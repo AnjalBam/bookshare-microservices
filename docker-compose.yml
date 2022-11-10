@@ -1,0 +1,57 @@
+version: '3.9'
+
+services:
+  mool_dwar:
+    build: 
+      context: ./mool_dwar
+    image: bookshare/mool_dwar
+    container_name: bookshare_mool_dwar
+    volumes:
+      - ./mool_dwar/:/app/mool_dwar/
+      - /app/mool_dwar/node_modules
+    ports: 
+      - 4000:4000
+    networks:
+      - bookshare-net
+    links: 
+      - redis
+
+  redis: 
+    image: redis:7-alpine
+    container_name: bookshare_redis
+    volumes:
+      - bookshare-redis:/data
+      # - ./config/redis:/usr/local/etc/redis
+    expose:
+      - 6379
+    ports:
+      - "6379:6379"
+
+    networks:
+      - bookshare-net
+  
+  test_server: 
+    build:
+      context: ./test_server
+    image: bookshare/test_server
+    container_name: bookshare_test_server
+    volumes:
+      - ./test_server/:/app/test_server/
+      - /app/test_server/node_modules
+    
+    expose:
+      - 4001
+    
+    networks:
+      - bookshare-net
+
+volumes:
+  bookshare-db:
+    name: bookshare_db
+  bookshare-redis: 
+    name: bookshare_redis
+
+networks:
+  bookshare-net:
+    name: bookshare-net
+    driver: bridge
