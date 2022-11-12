@@ -1,16 +1,19 @@
-// const redis = require("redis");
-// const { promisify } = require("util");
+const redis = require("redis");
+const { promisify } = require("util");
 
-// const client = redis.createClient({
-//   host: "localhost",
-//   port: 6379,
-// });
+let client;
 
-// client.on("error", (err) => {
-//   console.log("Failed to connect to redis: " + err);
-// });
+(async () => {
+  client = redis.createClient({ url: "redis://redis" });
+  await client.connect();
+})();
 
-// const setAsync = promisify(client.set).bind(client);
-// const getAsync = promisify(client.get).bind(client);
+client.on("ready", () => {
+  console.log("connected");
+});
 
-// module.exports = { setAsync, getAsync };
+client.on("error", (err) => {
+  console.log("Failed to connect to redis: ", err);
+});
+
+module.exports = client;

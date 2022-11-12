@@ -21,11 +21,24 @@ services:
     container_name: bookshare_redis
     volumes:
       - bookshare-redis:/data
-      # - ./config/redis:/usr/local/etc/redis
+
     expose:
-      - 6379
-    ports:
-      - "6379:6379"
+      - {REDIS_PORT}
+
+    networks:
+      - bookshare-net
+
+  db:
+    image: postgres:14-alpine
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - bookshare-postgres:/var/lib/postgresql/data/
+    
+    expose:
+      - ${POSTGRES_PORT}
 
     networks:
       - bookshare-net
@@ -45,9 +58,37 @@ services:
     networks:
       - bookshare-net
 
+  auth: 
+    build: 
+      context: ./auth
+    image: bookshare/auth
+    container_name: bookshare_auth
+    volumes: 
+      - ./auth:/app/auth
+    expose:
+      - ${AUTH_PORT}
+    command: "python manage.py runserver 0.0.0.0:${AUTH_PORT}"
+
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_HOST=db
+
+      - REDIS_HOST=redis
+      - REDIS_PORT={REDIS_PORT}
+
+    depends_on:
+      - db
+      - redis
+
+    networks:
+      - bookshare-net
+
 volumes:
-  bookshare-db:
-    name: bookshare_db
+  bookshare-postgres:
+    name: bookshare_postgres
   bookshare-redis: 
     name: bookshare_redis
 

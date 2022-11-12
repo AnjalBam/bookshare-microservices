@@ -11,6 +11,17 @@ const ROUTES = [
         }
     },
     {
+        url: '/auth',
+        auth: false,
+        proxy: {
+            target: "http://auth:5000",
+            changeOrigin: true,
+            pathRewrite: {
+                [`^/auth`]: '',
+            },
+        }
+    },
+    {
         url: '/premium',
         proxy: {
             target: "https://www.google.com",
