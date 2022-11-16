@@ -23,7 +23,7 @@ services:
       - bookshare-redis:/data
 
     expose:
-      - {REDIS_PORT}
+      - ${REDIS_PORT}
 
     networks:
       - bookshare-net
@@ -77,7 +77,7 @@ services:
       - POSTGRES_HOST=db
 
       - REDIS_HOST=redis
-      - REDIS_PORT={REDIS_PORT}
+      - REDIS_PORT=${REDIS_PORT}
 
     depends_on:
       - db

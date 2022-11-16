@@ -3,6 +3,7 @@ const morgan = require("morgan");
 
 const { setupProxies } = require("./proxy");
 const { ROUTES } = require("./routes");
+const { routeAuthMiddleware } = require("./middlewares/RouteAuth.middleware");
 
 const client = require("./db/redis");
 
@@ -10,6 +11,8 @@ const app = express();
 const port = 4000;
 
 app.use(morgan("dev"));
+
+app.use(routeAuthMiddleware);
 
 app.get("/test-redis", async (req, res) => {
   client.set("name", "Anjal");
