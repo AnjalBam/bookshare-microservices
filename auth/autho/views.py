@@ -10,6 +10,8 @@ from django.conf import settings
 
 from .serializers import UserSerializer, LoginSerializer
 
+from helpers.producer import publish_message
+
 client = settings.REDIS_INSTANCE
 User = get_user_model()
 
@@ -19,7 +21,16 @@ User = get_user_model()
 def test(request, *args, **kwargs):
     client.set("name", "Anjal")
     name = client.get("name")
-    print(name)
+    # channel = settings.MQ_CLIENT
+    # print('declaring queue')
+    # channel.queue_declare(queue='hello')
+    # # message = input('Type some message: ');
+    # message = 'Hello world'
+    # print(message)
+    # channel.basic_publish(exchange='', routing_key='hello', body=message)
+    # print(f" [x] Sent '{message}'")
+    publish_message()
+    
     return Response({"url": request.path, "name": name})
 
 
@@ -64,7 +75,7 @@ class LoginView(APIView):
 
         access_token = str(refresh.access_token)
 
-        client.hset(access_token, mapping={"user": user.id})
+        client.hset(access_token, mapping={"user": user.id, 'username': user.username})
 
         return Response(
             {

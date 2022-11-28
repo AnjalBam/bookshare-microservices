@@ -1,98 +1,143 @@
-version: '3.9'
+version: '3.8'
 
 services:
-  mool_dwar:
-    build: 
-      context: ./mool_dwar
-    image: bookshare/mool_dwar
-    container_name: bookshare_mool_dwar
-    volumes:
-      - ./mool_dwar/:/app/mool_dwar/
-      - /app/mool_dwar/node_modules
-    ports: 
-      - 4000:4000
-    networks:
-      - bookshare-net
-    links: 
-      - redis
+    mool_dwar:
+        build:
+            context: ./mool_dwar
+        image: bookshare/mool_dwar
+        container_name: bookshare_mool_dwar
+        volumes:
+            - ./mool_dwar/:/app/mool_dwar/
+            - /app/mool_dwar/node_modules
+        ports:
+            - 4000:4000
+        networks:
+            - bookshare-net
+        links:
+            - redis
 
-  redis: 
-    image: redis:7-alpine
-    container_name: bookshare_redis
-    volumes:
-      - bookshare-redis:/data
+    redis:
+        image: redis:7-alpine
+        container_name: bookshare_redis
+        volumes:
+            - bookshare-redis:/data
 
-    expose:
-      - ${REDIS_PORT}
+        expose:
+            - ${REDIS_PORT}
 
-    networks:
-      - bookshare-net
+        networks:
+            - bookshare-net
 
-  db:
-    image: postgres:14-alpine
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
-    volumes:
-      - bookshare-postgres:/var/lib/postgresql/data/
-    
-    expose:
-      - ${POSTGRES_PORT}
+    db:
+        image: postgres:14-alpine
+        environment:
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            - POSTGRES_DB=${POSTGRES_DB}
+        volumes:
+            - bookshare-postgres:/var/lib/postgresql/data/
 
-    networks:
-      - bookshare-net
-  
-  test_server: 
-    build:
-      context: ./test_server
-    image: bookshare/test_server
-    container_name: bookshare_test_server
-    volumes:
-      - ./test_server/:/app/test_server/
-      - /app/test_server/node_modules
-    
-    expose:
-      - 4001
-    
-    networks:
-      - bookshare-net
+        expose:
+            - ${POSTGRES_PORT}
 
-  auth: 
-    build: 
-      context: ./auth
-    image: bookshare/auth
-    container_name: bookshare_auth
-    volumes: 
-      - ./auth:/app/auth
-    expose:
-      - ${AUTH_PORT}
-    command: "python manage.py runserver 0.0.0.0:${AUTH_PORT}"
+        networks:
+            - bookshare-net
 
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_PORT=${POSTGRES_PORT}
-      - POSTGRES_HOST=db
+    test_server:
+        build:
+            context: ./test_server
+        image: bookshare/test_server
+        container_name: bookshare_test_server
+        volumes:
+            - ./test_server/:/app/test_server/
+            - /app/test_server/node_modules
 
-      - REDIS_HOST=redis
-      - REDIS_PORT=${REDIS_PORT}
+        expose:
+            - 4001
 
-    depends_on:
-      - db
-      - redis
+        networks:
+            - bookshare-net
 
-    networks:
-      - bookshare-net
+    auth:
+        build:
+            context: ./auth
+        image: bookshare/auth
+        container_name: bookshare_auth
+        volumes:
+            - ./auth:/app/auth
+        expose:
+            - ${AUTH_PORT}
+        command: 'python manage.py runserver 0.0.0.0:${AUTH_PORT}'
 
+        environment:
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            - POSTGRES_DB=${POSTGRES_DB}
+            - POSTGRES_PORT=${POSTGRES_PORT}
+            - POSTGRES_HOST=db
+
+            - REDIS_HOST=redis
+            - REDIS_PORT=${REDIS_PORT}
+
+            - RABBIT_MQ_HOST=bookshare_mq
+
+        depends_on:
+            - db
+            - redis
+            - bookshare_mq
+
+        networks:
+            - bookshare-net
+
+    store:
+        build:
+            context: ./store
+        image: bookshare/store
+        container_name: bookshare_store
+        volumes:
+            - ./store:/app/store
+        expose:
+            - 8001
+        command: 'python manage.py runserver 0.0.0.0:8001'
+
+        environment:
+            - REDIS_HOST=redis
+            - REDIS_PORT=${REDIS_PORT}
+
+            - RABBIT_MQ_HOST=bookshare_mq
+
+        depends_on:
+            - redis
+            - bookshare_mq
+
+        networks:
+            - bookshare-net
+
+    bookshare_mq:
+        image: rabbitmq:3.11-management-alpine
+        container_name: bookshare_rmq
+        environment:
+            - RABBITMQ_CONFIG_FILES=/etc/rabbitmq/rabbitmq.conf
+        ports:
+            - 5672:5672
+            - 15672:15672
+        expose:
+            - 5672
+        volumes:
+            - ./rabbit_mq/data:/var/lib/rabbitmq/
+            - ./rabbit_mq/logs:/var/log/rabbitmq/
+            - ./rabbit_mq/config:/etc/rabbitmq/rabbitmq.conf
+        networks:
+            - bookshare-net
 volumes:
-  bookshare-postgres:
-    name: bookshare_postgres
-  bookshare-redis: 
-    name: bookshare_redis
+    rabbit_mq_data:
+    rabbit_mq_logs:
+    bookshare-postgres:
+        name: bookshare_postgres
+    bookshare-redis:
+        name: bookshare_redis
 
 networks:
-  bookshare-net:
-    name: bookshare-net
-    driver: bridge
+    bookshare-net:
+        name: bookshare-net
+        driver: bridge

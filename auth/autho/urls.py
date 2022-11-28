@@ -6,3 +6,4 @@ urlpatterns = [
     path("register/", views.SignUpAPIView.as_view()),
     path('login/', views.LoginView.as_view()),
 ]
+# api/v1/login
