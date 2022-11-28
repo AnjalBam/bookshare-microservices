@@ -189,6 +189,11 @@ import pika
 import telnetlib
 import time
 
+MQ_CONNECTION = None
+
+if (MQ_CONNECTION):
+    MQ_CONNECTION.close()
+
 
 # def on_connected(connection):
 #     connection.channel(on_open_callback=on_channel_open)
@@ -205,6 +210,10 @@ def update_channel(connection):
 
 
 def connect_rabbit_mq():
+    global MQ_CONNECTION
+    if (MQ_CONNECTION):
+        MQ_CONNECTION.close()
+    
     try:
         tel = telnetlib.Telnet("bookshare_mq", "5672", 10)
         tel.close()
@@ -223,21 +232,25 @@ def connect_rabbit_mq():
 MQ_CONNECTION = connect_rabbit_mq()
 
 
-def listen_to_Queue():
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host=MQ_HOST))
-    channel = connection.channel()
+# def listen_to_Queue():
+#     connection = pika.BlockingConnection(pika.ConnectionParameters(host=MQ_HOST))
+#     channel = connection.channel()
 
-    channel.queue_declare(queue='hello')
+#     channel.queue_declare(queue='hello')
 
-    def callback(ch, method, properties, body):
-        print(" [x] Received %r" % body)
+#     def callback(ch, method, properties, body):
+#         print(" [x] Received %r" % body)
 
-    channel.basic_consume(queue='hello', on_message_callback=callback, auto_ack=True)
+#     channel.basic_consume(queue='hello', on_message_callback=callback, auto_ack=True)
 
-    print(' [*] Waiting for messages. To exit press CTRL+C')
-    channel.start_consuming()
+#     print(' [*] Waiting for messages. To exit press CTRL+C')
+#     channel.start_consuming()
 
-import threading
+# import threading
 
-listen = threading.Thread(target=listen_to_Queue) 
-listen.start();
+# listen = threading.Thread(target=listen_to_Queue) 
+# listen.start();
+
+from .helpers import listen_to_consumers
+
+listen_to_consumers()
