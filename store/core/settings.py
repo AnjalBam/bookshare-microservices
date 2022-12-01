@@ -128,65 +128,8 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-MQ_CLIENT = None
-MQ_CONNECTION = None
 
-# Rabbit MQ configurations
-MQ_HOST = "bookshare_mq"
-import pika
-import telnetlib
-import time
+# Put this at the last always
+from .helpers import start_consumers
 
-
-# def on_connected(connection):
-#     connection.channel(on_open_callback=on_channel_open)
-
-
-# def on_channel_open(new_channel):
-#     global MQ_CLIENT
-#     MQ_CLIENT = new_channel
-
-
-def update_channel(connection):
-    global MQ_CLIENT
-    MQ_CLIENT = connection.channel()
-
-
-def connect_rabbit_mq():
-    try:
-        print('connecting to mq')
-        tel = telnetlib.Telnet("bookshare_mq", "5672", 10)
-        tel.close()
-        connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host=MQ_HOST),
-        )
-        update_channel(connection=connection)
-        return connection
-    except ConnectionRefusedError as e:
-        print("error", e)
-        print("Rabbit MQ not open. Trying again in 3s")
-        time.sleep(3)
-        connect_rabbit_mq()
-
-
-MQ_CONNECTION = connect_rabbit_mq()
-
-
-def listen_to_queue():
-    channel = MQ_CONNECTION.channel()
-
-    channel.queue_declare(queue="hello")
-
-    def callback(ch, method, properties, body):
-        print(" [x] Received %r" % body)
-
-    channel.basic_consume(queue="hello", on_message_callback=callback, auto_ack=True)
-
-    print(" [*] Waiting for messages. To exit press CTRL+C")
-    channel.start_consuming()
-
-
-import threading
-
-connection_thread = threading.Thread(target=listen_to_queue)
-connection_thread.start()
+start_consumers()

@@ -31,14 +31,14 @@ services:
     db:
         image: postgres:14-alpine
         environment:
-            - POSTGRES_USER=${POSTGRES_USER}
-            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-            - POSTGRES_DB=${POSTGRES_DB}
+            - POSTGRES_USER=${AUTH_POSTGRES_USER}
+            - POSTGRES_PASSWORD=${AUTH_POSTGRES_PASSWORD}
+            - POSTGRES_DB=${AUTH_POSTGRES_DB}
         volumes:
             - bookshare-postgres:/var/lib/postgresql/data/
 
         expose:
-            - ${POSTGRES_PORT}
+            - ${AUTH_POSTGRES_PORT}
 
         networks:
             - bookshare-net
@@ -60,20 +60,20 @@ services:
 
     auth:
         build:
-            context: ./auth
-        image: bookshare/auth
-        container_name: bookshare_auth
+            context: ./auth0
+        image: bookshare/auth0
+        container_name: bookshare_auth0
         volumes:
-            - ./auth:/app/auth
+            - ./auth0:/app/auth0
         expose:
             - ${AUTH_PORT}
         command: 'python manage.py runserver 0.0.0.0:${AUTH_PORT}'
 
         environment:
-            - POSTGRES_USER=${POSTGRES_USER}
-            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-            - POSTGRES_DB=${POSTGRES_DB}
-            - POSTGRES_PORT=${POSTGRES_PORT}
+            - POSTGRES_USER=${AUTH_POSTGRES_USER}
+            - POSTGRES_PASSWORD=${AUTH_POSTGRES_PASSWORD}
+            - POSTGRES_DB=${AUTH_POSTGRES_DB}
+            - POSTGRES_PORT=${AUTH_POSTGRES_PORT}
             - POSTGRES_HOST=db
 
             - REDIS_HOST=redis

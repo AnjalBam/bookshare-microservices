@@ -5,5 +5,10 @@
 
 .env
 
+
+**/**/venv
+**/**/.env
+**/**/env
+
 /rabbit_mq/data/
 /rabbit_mq/logs/
