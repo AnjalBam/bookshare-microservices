@@ -28,17 +28,33 @@ services:
         networks:
             - bookshare-net
 
-    db:
+    auth-db:
         image: postgres:14-alpine
         environment:
             - POSTGRES_USER=${AUTH_POSTGRES_USER}
             - POSTGRES_PASSWORD=${AUTH_POSTGRES_PASSWORD}
             - POSTGRES_DB=${AUTH_POSTGRES_DB}
         volumes:
-            - bookshare-postgres:/var/lib/postgresql/data/
+            - bookshare-postgres-auth:/var/lib/postgresql/data/
 
         expose:
             - ${AUTH_POSTGRES_PORT}
+
+        networks:
+            - bookshare-net
+    
+    store-db:
+        image: postgres:14-alpine
+        command: -p ${STORE_POSTGRES_PORT}
+        environment:
+            - POSTGRES_USER=${STORE_POSTGRES_USER}
+            - POSTGRES_PASSWORD=${STORE_POSTGRES_PASSWORD}
+            - POSTGRES_DB=${STORE_POSTGRES_DB}
+        volumes:
+            - bookshare-postgres-store:/var/lib/postgresql/data/
+
+        expose:
+            - ${STORE_POSTGRES_PORT}
 
         networks:
             - bookshare-net
@@ -74,7 +90,7 @@ services:
             - POSTGRES_PASSWORD=${AUTH_POSTGRES_PASSWORD}
             - POSTGRES_DB=${AUTH_POSTGRES_DB}
             - POSTGRES_PORT=${AUTH_POSTGRES_PORT}
-            - POSTGRES_HOST=db
+            - POSTGRES_HOST=auth-db
 
             - REDIS_HOST=redis
             - REDIS_PORT=${REDIS_PORT}
@@ -82,7 +98,7 @@ services:
             - RABBIT_MQ_HOST=bookshare_mq
 
         depends_on:
-            - db
+            - auth-db
             - redis
             - bookshare_mq
 
@@ -101,12 +117,19 @@ services:
         command: 'python manage.py runserver 0.0.0.0:8001'
 
         environment:
+            - POSTGRES_USER=${AUTH_POSTGRES_USER}
+            - POSTGRES_PASSWORD=${AUTH_POSTGRES_PASSWORD}
+            - POSTGRES_DB=${AUTH_POSTGRES_DB}
+            - POSTGRES_PORT=${AUTH_POSTGRES_PORT}
+            - POSTGRES_HOST=store-db
+
             - REDIS_HOST=redis
             - REDIS_PORT=${REDIS_PORT}
 
             - RABBIT_MQ_HOST=bookshare_mq
 
         depends_on:
+            - store-db
             - redis
             - bookshare_mq
 
@@ -132,10 +155,9 @@ services:
 volumes:
     rabbit_mq_data:
     rabbit_mq_logs:
-    bookshare-postgres:
-        name: bookshare_postgres
+    bookshare-postgres-store:
+    bookshare-postgres-auth:
     bookshare-redis:
-        name: bookshare_redis
 
 networks:
     bookshare-net:
