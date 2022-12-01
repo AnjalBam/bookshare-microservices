@@ -9,8 +9,14 @@ services:
         volumes:
             - ./mool_dwar/:/app/mool_dwar/
             - /app/mool_dwar/node_modules
+        environment:
+            - AUTH_HOST=auth
+            - AUTH_PORT=${AUTH_PORT}
+
+            - STORE_HOST=store
+            - STORE_PORT=${STORE_PORT}
         ports:
-            - 4000:4000
+            - ${PORT}:${PORT}
         networks:
             - bookshare-net
         links:
@@ -113,14 +119,14 @@ services:
         volumes:
             - ./store:/app/store
         expose:
-            - 8001
-        command: 'python manage.py runserver 0.0.0.0:8001'
+            - ${STORE_PORT}
+        command: 'python manage.py runserver 0.0.0.0:${STORE_PORT}'
 
         environment:
-            - POSTGRES_USER=${AUTH_POSTGRES_USER}
-            - POSTGRES_PASSWORD=${AUTH_POSTGRES_PASSWORD}
-            - POSTGRES_DB=${AUTH_POSTGRES_DB}
-            - POSTGRES_PORT=${AUTH_POSTGRES_PORT}
+            - POSTGRES_USER=${STORE_POSTGRES_USER}
+            - POSTGRES_PASSWORD=${STORE_POSTGRES_PASSWORD}
+            - POSTGRES_DB=${STORE_POSTGRES_DB}
+            - POSTGRES_PORT=${STORE_POSTGRES_PORT}
             - POSTGRES_HOST=store-db
 
             - REDIS_HOST=redis
