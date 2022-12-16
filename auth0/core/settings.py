@@ -43,6 +43,7 @@ INSTALLED_APPS = [
 SITE_ID = 1
 
 MIDDLEWARE = [
+    'core.middlewares.InternalAuthMiddleware.InternalAuthMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -129,6 +130,12 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# REDIS
+import redis
+
+pool = redis.ConnectionPool(host=config("REDIS_HOST"), port=config("REDIS_PORT", default=6379, cast=int), db=0)
+REDIS_CLIENT = redis.Redis(connection_pool=pool)
 
 from auth.helpers import start_consumers
 
