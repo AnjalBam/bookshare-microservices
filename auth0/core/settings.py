@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+from .helpers import start_consumers
+import redis
 from pathlib import Path
 from decouple import config
 
@@ -38,11 +40,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'corsheaders',
+    'auth0',
 ]
 
 SITE_ID = 1
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'core.middlewares.InternalAuthMiddleware.InternalAuthMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -54,6 +61,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'core.urls'
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 TEMPLATES = [
     {
@@ -73,20 +82,24 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
-REST_FRAMEWORK = {}
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-   'default': {
-       'ENGINE': 'django.db.backends.postgresql',
-       'NAME': config('POSTGRES_DB'),
-       'USER': config('POSTGRES_USER'),
-       'PASSWORD': config('POSTGRES_PASSWORD'),
-       'HOST': config('POSTGRES_HOST'),
-       'PORT': config('POSTGRES_PORT'),
-   }
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('POSTGRES_DB'),
+        'USER': config('POSTGRES_USER'),
+        'PASSWORD': config('POSTGRES_PASSWORD'),
+        'HOST': config('POSTGRES_HOST'),
+        'PORT': config('POSTGRES_PORT'),
+    }
 }
 
 
@@ -121,6 +134,9 @@ USE_I18N = True
 USE_TZ = True
 
 
+AUTH_USER_MODEL = 'auth0.MyUser'
+
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
@@ -132,13 +148,10 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # REDIS
-import redis
 
-pool = redis.ConnectionPool(host=config("REDIS_HOST"), port=config("REDIS_PORT", default=6379, cast=int), db=0)
+pool = redis.ConnectionPool(host=config("REDIS_HOST"), port=config(
+    "REDIS_PORT", default=6379, cast=int), db=0)
 REDIS_CLIENT = redis.Redis(connection_pool=pool)
-
-from auth.helpers import start_consumers
 
 
 start_consumers()
-

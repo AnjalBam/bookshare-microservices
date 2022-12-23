@@ -35,7 +35,7 @@ const ROUTES = [
             target: `http://${STORE_HOST}:${STORE_PORT}`,
             changeOrigin: true,
             pathRewrite: {
-                [`^/auth`]: '',
+                [`^/store`]: '',
             },
         }
     },
