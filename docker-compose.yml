@@ -26,7 +26,7 @@ services:
         image: redis:7-alpine
         container_name: bookshare_redis
         volumes:
-            - bookshare-redis:/data
+            - bookshare_redis_00:/data
 
         expose:
             - ${REDIS_PORT}
@@ -41,7 +41,7 @@ services:
             - POSTGRES_PASSWORD=${AUTH_POSTGRES_PASSWORD}
             - POSTGRES_DB=${AUTH_POSTGRES_DB}
         volumes:
-            - bookshare-postgres-auth:/var/lib/postgresql/data/
+            - bookshare_postgres_auth_00:/var/lib/postgresql/data/
 
         expose:
             - ${AUTH_POSTGRES_PORT}
@@ -57,7 +57,7 @@ services:
             - POSTGRES_PASSWORD=${STORE_POSTGRES_PASSWORD}
             - POSTGRES_DB=${STORE_POSTGRES_DB}
         volumes:
-            - bookshare-postgres-store:/var/lib/postgresql/data/
+            - bookshare_postgres_store_00:/var/lib/postgresql/data/
 
         expose:
             - ${STORE_POSTGRES_PORT}
@@ -159,11 +159,11 @@ services:
         networks:
             - bookshare-net
 volumes:
-    rabbit_mq_data:
-    rabbit_mq_logs:
-    bookshare-postgres-store:
-    bookshare-postgres-auth:
-    bookshare-redis:
+    rabbit_mq_data_00:
+    rabbit_mq_logs_00:
+    bookshare_postgres_store_00:
+    bookshare_postgres_auth_00:
+    bookshare_redis_00:
 
 networks:
     bookshare-net:

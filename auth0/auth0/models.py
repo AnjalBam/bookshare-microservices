@@ -4,16 +4,15 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils.translation import gettext_lazy as _
 import uuid
 
+from helpers.models import BaseModel
+
 
 def image_upload_path(instance, filename):
 
     return "user_{0}/dp/{1}".format(instance.id, uuid.uuid4())
 
 
-class MyUser(AbstractUser):
-    id = models.UUIDField(
-        verbose_name="User Id", default=uuid.uuid4, primary_key=True, unique=True
-    )
+class MyUser(BaseModel, AbstractUser):
     email = models.EmailField(verbose_name="email", max_length=60, unique=True)
     is_verified = models.BooleanField(verbose_name="Is Verified", default=False)
     is_google_linked = models.BooleanField(verbose_name="Google Link", default=False)

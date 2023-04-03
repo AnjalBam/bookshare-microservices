@@ -19,8 +19,8 @@ from urllib.request import urlretrieve
 
 from datetime import datetime
 
-from google.oauth2 import id_token
-from google.auth.transport import requests
+# from google.oauth2 import id_token
+# from google.auth.transport import requests
 import os
 
 from decouple import config
@@ -44,48 +44,48 @@ def test(request):
     return Response({"message": "Running"})
 
 
-class LoginWithGoogle(APIView):
-    def post(self, request, *args, **kwargs):
-        try:
-            token = request.data.get("token", None)
-            # Specify the CLIENT_ID of the app that accesses the backend:
-            CLIENT_ID = config("GOOGLE_CLIENT_ID")
-            decoded = id_token.verify_oauth2_token(token, requests.Request(), CLIENT_ID)
+# class LoginWithGoogle(APIView):
+#     def post(self, request, *args, **kwargs):
+#         try:
+#             token = request.data.get("token", None)
+#             # Specify the CLIENT_ID of the app that accesses the backend:
+#             CLIENT_ID = config("GOOGLE_CLIENT_ID")
+#             decoded = id_token.verify_oauth2_token(token, requests.Request(), CLIENT_ID)
 
-            usr = None
-            try:
-                usr = User.objects.get(email=decoded["email"])
-                if not usr.is_google_linked:
-                    usr.is_google_linked = True
-                    usr.save()
-            except User.DoesNotExist:
-                usr = User()
-                usr.email = decoded["email"]
-                usr.first_name = decoded["given_name"]
-                usr.last_name = decoded["family_name"]
-                usr.username = (
-                    decoded["given_name"] + "_" + str(datetime.now().microsecond)
-                )
-                image_url = decoded.get("picture", None)
-                if image_url:
-                    print(image_url)
-                    result = urlretrieve(image_url)
-                    usr.display_picture.save(
-                        os.path.basename(image_url), File(open(result[0], "rb"))
-                    )
-                usr.is_active = True
-                usr.is_verified = True
-                usr.set_unusable_password()
-                usr.save()
-            tokens = User.get_token(usr)
-            print(tokens)
-            return Response(tokens, status=status.HTTP_200_OK)
-        except ValueError as e:
-            print(e)
-            return Response(
-                {"detail": "Login failed", "error": str(e)},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+#             usr = None
+#             try:
+#                 usr = User.objects.get(email=decoded["email"])
+#                 if not usr.is_google_linked:
+#                     usr.is_google_linked = True
+#                     usr.save()
+#             except User.DoesNotExist:
+#                 usr = User()
+#                 usr.email = decoded["email"]
+#                 usr.first_name = decoded["given_name"]
+#                 usr.last_name = decoded["family_name"]
+#                 usr.username = (
+#                     decoded["given_name"] + "_" + str(datetime.now().microsecond)
+#                 )
+#                 image_url = decoded.get("picture", None)
+#                 if image_url:
+#                     print(image_url)
+#                     result = urlretrieve(image_url)
+#                     usr.display_picture.save(
+#                         os.path.basename(image_url), File(open(result[0], "rb"))
+#                     )
+#                 usr.is_active = True
+#                 usr.is_verified = True
+#                 usr.set_unusable_password()
+#                 usr.save()
+#             tokens = User.get_token(usr)
+#             print(tokens)
+#             return Response(tokens, status=status.HTTP_200_OK)
+#         except ValueError as e:
+#             print(e)
+#             return Response(
+#                 {"detail": "Login failed", "error": str(e)},
+#                 status=status.HTTP_400_BAD_REQUEST,
+#             )
 
 
 class UserSignUpView(APIView):
