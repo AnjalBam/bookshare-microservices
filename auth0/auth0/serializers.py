@@ -54,9 +54,9 @@ class UserSignUpSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = super().create(validated_data=validated_data)
-        user.is_verified = False
+        user.is_verified = True
         user.set_password(validated_data["password"])
-        self.send_confirmation_email(user=user)
+        # self.send_confirmation_email(user=user)
         user.save()
         return user
 
