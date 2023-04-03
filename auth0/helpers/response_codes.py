@@ -10,5 +10,3 @@ response_codes = {
     'throttled': 4029,
     'server_error': 5000,
 }
-
-from rest_framework import status

@@ -88,6 +88,11 @@ REST_FRAMEWORK = {
     )
 }
 
+SIMPLE_JWT =  {
+    "USER_ID_FIELD": "idx",
+    "USER_ID_CLAIM": "user_idx",
+}
+
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 

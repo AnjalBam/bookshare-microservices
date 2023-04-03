@@ -22,11 +22,9 @@ class UserSignUpSerializer(serializers.ModelSerializer):
             "username",
             "email",
             "password",
-            "display_picture",
         ]
         extra_kwargs = {
             "password": {"write_only": True, 'min_length': 8},
-            "display_picture": {"required": False},
             "first_name": {"required": True},
             "last_name": {"required": True},
         }
@@ -34,7 +32,7 @@ class UserSignUpSerializer(serializers.ModelSerializer):
     def jwt_encode(self, data):
         encoded = jwt.encode(
             {
-                "id": str(data.id),
+                "id": str(data.idx),
                 "email": data.email,
             },
             key=settings.SECRET_KEY,

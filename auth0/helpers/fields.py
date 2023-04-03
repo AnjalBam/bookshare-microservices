@@ -5,7 +5,7 @@ from helpers.utils import get_uid_str
 
 
 class AutoIdxField(CharField):
-    def __init__(self,auto=True, primary_key=True, *args, **kwargs):
+    def __init__(self, auto=True, primary_key=True, *args, **kwargs):
         kwargs['max_length'] = 50
         kwargs['unique'] = True
         kwargs['primary_key'] = primary_key
