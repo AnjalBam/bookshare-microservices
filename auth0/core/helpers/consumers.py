@@ -1,9 +1,10 @@
 import telnetlib, pika, time
 
-MQ_HOST = "bookshare_mq"
+from decouple import config
 
-import threading
-stop_event = threading.Event()
+MQ_HOST = config("RABBIT_MQ_HOST", default="localhost")
+
+STORE_EVENTS = 'store_events'
 
 def get_mq_connection():
     try:
@@ -12,6 +13,9 @@ def get_mq_connection():
         connection = pika.BlockingConnection(
             pika.ConnectionParameters(host=MQ_HOST),
         )
+        if not connection:
+            print('no connection')
+            get_mq_connection()
         return connection
     except ConnectionRefusedError as e:
         print("error", e)
@@ -22,44 +26,62 @@ def get_mq_connection():
 def listen_to_queue():
     connection = get_mq_connection()
     channel = connection.channel()
-    channel.queue_declare(queue="hello")
+    channel.queue_declare(queue="auth0")
+    channel.queue_bind(exchange='users', queue="auth0")
 
     def callback(ch, method, properties, body):
         print(" [x] Received %r" % body)
 
-    channel.basic_consume(queue="hello", on_message_callback=callback, auto_ack=True)
+    channel.basic_consume(queue="auth0", on_message_callback=callback, auto_ack=True)
 
     print(" [*] Waiting for messages. To exit press CTRL+C")
-    # channel.start_consuming()
-    stop_event.set()
+    channel.start_consuming()
     connection.close()
 
 
 def listen_to_queue_2():
     connection = get_mq_connection()
     channel = connection.channel()
-    channel.queue_declare(queue="hello")
+    channel.queue_declare(queue="queue_2")
 
     def callback(ch, method, properties, body):
-        print(" [x] Received %r" % body)
+        print(" [TEST] Received %r" % body)
 
-    channel.basic_consume(queue="hello", on_message_callback=callback, auto_ack=True)
+    channel.exchange_declare(exchange=STORE_EVENTS, exchange_type="fanout")
+    channel.queue_bind(exchange=STORE_EVENTS, queue="queue_2")
 
-    print(" [*]2 Waiting for messages. To exit press CTRL+C here")
-    # channel.start_consuming()
-    stop_event.set()
+    channel.basic_consume(queue="queue_2", on_message_callback=callback, auto_ack=True)
+
+    print(" [TEST] Waiting for messages. To exit press CTRL+C here")
+    channel.start_consuming()
     connection.close()
 
+def listen_to_store_events():
+    connection = get_mq_connection()
+    channel = connection.channel()
+    channel.queue_declare(queue="store")
 
-# print(threading.current_thread())
+    def callback(ch, method, properties, body):
+        print(" [STORE] Received %r" % body)
+    
+    channel.exchange_declare(exchange=STORE_EVENTS, exchange_type="fanout")
+    channel.queue_bind(exchange=STORE_EVENTS, queue="store")
 
-listen_to_queue = threading.Thread(target=listen_to_queue)
-listen_to_queue_2 = threading.Thread(target=listen_to_queue_2)
+    channel.basic_consume(queue="store", on_message_callback=callback, auto_ack=True)
+
+    print(" [STORE] Waiting for messages. To exit press CTRL+C here")
+    channel.start_consuming()
+    connection.close()
+
+consumer_map = {
+    "test": listen_to_queue_2,
+    "store": listen_to_store_events
+}
 
 
 def start_consumers(): 
     print('Starting consumers')
-    listen_to_queue.start()
-    listen_to_queue.join()
-    listen_to_queue_2.start()
-    listen_to_queue_2.join()
+    # listen_to_queue.start()
+    # listen_to_queue.join()
+    # listen_to_queue_2.start()
+    # listen_to_queue_2.join()
