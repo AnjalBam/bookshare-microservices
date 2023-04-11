@@ -1,5 +1,25 @@
 version: '3.8'
 
+x-store-env: &store_env
+    POSTGRES_USER: ${STORE_POSTGRES_USER}
+    POSTGRES_PASSWORD: ${STORE_POSTGRES_PASSWORD}
+    POSTGRES_DB: ${STORE_POSTGRES_DB}
+    POSTGRES_PORT: ${STORE_POSTGRES_PORT}
+    POSTGRES_HOST: store-db
+    REDIS_HOST: redis
+    REDIS_PORT: ${REDIS_PORT}
+    RABBIT_MQ_HOST: bookshare_mq
+
+x-auth-env: &auth_env
+    POSTGRES_USER:  ${AUTH_POSTGRES_USER}
+    POSTGRES_PASSWORD:  ${AUTH_POSTGRES_PASSWORD}
+    POSTGRES_DB:  ${AUTH_POSTGRES_DB}
+    POSTGRES_PORT:  ${AUTH_POSTGRES_PORT}
+    POSTGRES_HOST:  auth-db
+    REDIS_HOST:  redis
+    REDIS_PORT:  ${REDIS_PORT}
+    RABBIT_MQ_HOST:  bookshare_mq
+
 services:
     mool_dwar:
         build:
@@ -91,23 +111,51 @@ services:
             - ${AUTH_PORT}
         command: 'python manage.py runserver 0.0.0.0:${AUTH_PORT}'
 
-        environment:
-            - POSTGRES_USER=${AUTH_POSTGRES_USER}
-            - POSTGRES_PASSWORD=${AUTH_POSTGRES_PASSWORD}
-            - POSTGRES_DB=${AUTH_POSTGRES_DB}
-            - POSTGRES_PORT=${AUTH_POSTGRES_PORT}
-            - POSTGRES_HOST=auth-db
-
-            - REDIS_HOST=redis
-            - REDIS_PORT=${REDIS_PORT}
-
-            - RABBIT_MQ_HOST=bookshare_mq
+        environment: *auth_env
 
         depends_on:
             - auth-db
             - redis
             - bookshare_mq
 
+        networks:
+            - bookshare-net
+
+    auth-consumer-store:
+        image: bookshare/auth0
+        container_name: bookshare_auth_consumer_store
+        volumes:
+            - ./auth0:/app/auth0
+
+        command: 'python manage.py runconsumers store'
+
+        environment: *auth_env
+
+        depends_on:
+            - auth-db
+            - redis
+            - bookshare_mq
+            - auth
+    
+        networks:
+            - bookshare-net
+
+    auth-consumer-queue:
+        image: bookshare/auth0
+        container_name: bookshare_auth_consumer_queue
+        volumes:
+            - ./auth0:/app/auth0
+
+        command: 'python manage.py runconsumers test'
+
+        environment: *auth_env
+
+        depends_on:
+            - auth-db
+            - redis
+            - bookshare_mq
+            - auth
+    
         networks:
             - bookshare-net
 
@@ -122,22 +170,48 @@ services:
             - ${STORE_PORT}
         command: 'python manage.py runserver 0.0.0.0:${STORE_PORT}'
 
-        environment:
-            - POSTGRES_USER=${STORE_POSTGRES_USER}
-            - POSTGRES_PASSWORD=${STORE_POSTGRES_PASSWORD}
-            - POSTGRES_DB=${STORE_POSTGRES_DB}
-            - POSTGRES_PORT=${STORE_POSTGRES_PORT}
-            - POSTGRES_HOST=store-db
-
-            - REDIS_HOST=redis
-            - REDIS_PORT=${REDIS_PORT}
-
-            - RABBIT_MQ_HOST=bookshare_mq
+        environment: *store_env
 
         depends_on:
             - store-db
             - redis
             - bookshare_mq
+
+        networks:
+            - bookshare-net
+
+    store-consumer-auth:
+        image: bookshare/store
+        container_name: bookshare_store_consumer_auth
+        volumes:
+            - ./store:/app/store
+        command: 'python manage.py runconsumers auth'
+
+        environment: *store_env
+
+        depends_on:
+            - store-db
+            - redis
+            - bookshare_mq
+            - store
+
+        networks:
+            - bookshare-net
+
+    store-consumer-queue:
+        image: bookshare/store
+        container_name: bookshare_store_consumer_queue
+        volumes:
+            - ./store:/app/store
+        command: 'python manage.py runconsumers queue_2'
+
+        environment: *store_env
+
+        depends_on:
+            - store-db
+            - redis
+            - bookshare_mq
+            - store
 
         networks:
             - bookshare-net

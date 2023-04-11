@@ -17,6 +17,8 @@ from core.mixins import ResponseMixin
 from django.core.files import File
 from urllib.request import urlretrieve
 
+from core.helpers.consumers import get_mq_connection
+
 from datetime import datetime
 
 # from google.oauth2 import id_token
@@ -33,7 +35,7 @@ from .serializers import (
 )
 import jwt
 from django.conf import settings
-
+from core.helpers.producers import send_message_to_queue
 
 User = get_user_model()
 # Create your views here.
@@ -41,6 +43,9 @@ User = get_user_model()
 
 @api_view(["GET"])
 def test(request):
+    # send_message_to_queue(body="Hello World!")
+    message = request.GET.get('message', 'Hello World!')
+    send_message_to_queue(body=message)
     return Response({"message": "Running"})
 
 
@@ -95,7 +100,10 @@ class UserSignUpView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        user = serializer.save()
+        print(user.__dict__)
+        user_data = {'first_name': user.first_name, 'last_name': user.last_name, 'is_staff': user.is_staff, 'is_active': user.is_active,
+                     'idx': user.idx, 'email': user.email, 'is_verified': user.is_verified}
         return Response(
             {"detail": "Sign up view", "data": serializer.data},
             status=status.HTTP_201_CREATED,

@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'auth0',
+    'helpers',
 ]
 
 SITE_ID = 1

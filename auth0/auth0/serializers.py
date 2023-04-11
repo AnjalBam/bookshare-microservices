@@ -56,7 +56,6 @@ class UserSignUpSerializer(serializers.ModelSerializer):
         user = super().create(validated_data=validated_data)
         user.is_verified = True
         user.set_password(validated_data["password"])
-        # self.send_confirmation_email(user=user)
         user.save()
         return user
 
@@ -82,11 +81,12 @@ class PasswordResetSerializer(serializers.Serializer):
         if username:
             kwargs["username"] = username
         user = get_object_or_404(User, **kwargs)
-        context = {'token' : jwt_encode_for_user(user)}
+        context = {'token': jwt_encode_for_user(user)}
         template_name = 'password_reset_email.html'
         subject = 'Password reset email'
         to_email = user.email
-        send_email(to_email=to_email, subject=subject, template_name=template_name, context=context)
+        send_email(to_email=to_email, subject=subject,
+                   template_name=template_name, context=context)
         return user
 
 
@@ -121,7 +121,6 @@ class ChangePasswordSerializer(serializers.Serializer):
     new_password = serializers.CharField(min_length=8, required=True)
     confirm_password = serializers.CharField(min_length=8, required=True)
 
-
     def validate(self, attrs):
         new_password = attrs.get('new_password', None)
         confirm_password = attrs.get('confirm_password', None)
@@ -137,8 +136,9 @@ class ChangePasswordSerializer(serializers.Serializer):
         request = self.context.get('request', None)
         current_password = self.validated_data.get('current_password', None)
         if not request:
-            raise APIException('No request object found in serializer. Must be passed via context.')
-        
+            raise APIException(
+                'No request object found in serializer. Must be passed via context.')
+
         if not request.user.is_authenticated:
             raise AuthenticationFailed('User not authenticated.')
 
@@ -155,5 +155,6 @@ class ChangePasswordSerializer(serializers.Serializer):
 class UserDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        read_only_fields=("is_active", 'is_verified', 'is_google_linked', 'email', 'ep', 'id', 'is_staff', 'is_superuser', 'date_joined', 'last_login',)
-        exclude=('password', 'groups', 'user_permissions')
+        read_only_fields = ("is_active", 'is_verified', 'is_google_linked', 'email',
+                            'ep', 'id', 'is_staff', 'is_superuser', 'date_joined', 'last_login',)
+        exclude = ('password', 'groups', 'user_permissions')

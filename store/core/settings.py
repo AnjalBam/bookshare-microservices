@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "corsheaders",
-    'store'
+    'store',
+    'helpers'
 ]
 
 MIDDLEWARE = [
@@ -141,4 +142,4 @@ REDIS_CLIENT = redis.Redis(connection_pool=pool)
 # Put this at the last always
 from .helpers import start_consumers
 
-start_consumers()
+# start_consumers()
