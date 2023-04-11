@@ -17,7 +17,7 @@ def get_mq_connection():
         )
         if not connection:
             print('no connection')
-            get_mq_connection()
+            return get_mq_connection()
         return connection
     except ConnectionRefusedError as e:
         print("error", e)

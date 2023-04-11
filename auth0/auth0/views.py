@@ -35,7 +35,8 @@ from .serializers import (
 )
 import jwt
 from django.conf import settings
-from core.helpers.producers import send_message_to_queue
+from core.helpers.producers import broadcast_message
+from helpers.utils import get_formatted_broadcast_message
 
 User = get_user_model()
 # Create your views here.
@@ -45,7 +46,8 @@ User = get_user_model()
 def test(request):
     # send_message_to_queue(body="Hello World!")
     message = request.GET.get('message', 'Hello World!')
-    send_message_to_queue(body=message)
+    fmessage = get_formatted_broadcast_message(event_type="test", data=message)
+    broadcast_message(exchange_name="auth_events", message=fmessage)
     return Response({"message": "Running"})
 
 
@@ -101,9 +103,11 @@ class UserSignUpView(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        print(user.__dict__)
         user_data = {'first_name': user.first_name, 'last_name': user.last_name, 'is_staff': user.is_staff, 'is_active': user.is_active,
                      'idx': user.idx, 'email': user.email, 'is_verified': user.is_verified}
+        
+        
+
         return Response(
             {"detail": "Sign up view", "data": serializer.data},
             status=status.HTTP_201_CREATED,

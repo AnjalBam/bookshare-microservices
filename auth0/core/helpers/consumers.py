@@ -15,7 +15,7 @@ def get_mq_connection():
         )
         if not connection:
             print('no connection')
-            get_mq_connection()
+            return get_mq_connection()
         return connection
     except ConnectionRefusedError as e:
         print("error", e)
@@ -41,35 +41,45 @@ def listen_to_queue():
 
 def listen_to_queue_2():
     connection = get_mq_connection()
-    channel = connection.channel()
+    try:
+        channel = connection.channel()
+    except Exception as e:
+        print(e)
+        print('[TEST] retrying...')
+        listen_to_store_events()
     channel.queue_declare(queue="queue_2")
 
     def callback(ch, method, properties, body):
-        print(" [TEST] Received %r" % body)
+        print("[TEST] Received %r" % body)
 
     channel.exchange_declare(exchange=STORE_EVENTS, exchange_type="fanout")
     channel.queue_bind(exchange=STORE_EVENTS, queue="queue_2")
 
     channel.basic_consume(queue="queue_2", on_message_callback=callback, auto_ack=True)
 
-    print(" [TEST] Waiting for messages. To exit press CTRL+C here")
+    print("[TEST] Waiting for messages. To exit press CTRL+C here")
     channel.start_consuming()
     connection.close()
 
 def listen_to_store_events():
     connection = get_mq_connection()
-    channel = connection.channel()
+    try:
+        channel = connection.channel()
+    except Exception as e:
+        print(e)
+        print('[STORE] retrying...')
+        listen_to_store_events()
     channel.queue_declare(queue="store")
 
     def callback(ch, method, properties, body):
-        print(" [STORE] Received %r" % body)
+        print("[STORE] Received %r" % body)
     
     channel.exchange_declare(exchange=STORE_EVENTS, exchange_type="fanout")
     channel.queue_bind(exchange=STORE_EVENTS, queue="store")
 
     channel.basic_consume(queue="store", on_message_callback=callback, auto_ack=True)
 
-    print(" [STORE] Waiting for messages. To exit press CTRL+C here")
+    print("[STORE] Waiting for messages. To exit press CTRL+C here")
     channel.start_consuming()
     connection.close()
 
@@ -80,7 +90,7 @@ consumer_map = {
 
 
 def start_consumers(): 
-    print('Starting consumers')
+    print('Starting consumers [[NOT USED ANYMORE]]')
     # listen_to_queue.start()
     # listen_to_queue.join()
     # listen_to_queue_2.start()
