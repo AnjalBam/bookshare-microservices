@@ -18,8 +18,12 @@ Every message should be a dictionary or a hashmap format including two major key
 - **event_scope**: The scope of event such as user, customer
 - **event_type**: The event type as a user is added modified or deleted.
 
+**NOTE:** Since we cannot use the hashmaps/dicts to transfer messages, we will need to convert them to buffers, fo this we will use the `pickle` library to dump it to binary representation, and we will later decode them in the consumer sides as well.
+
 ##### Example of a broadcast message
 ```python
+import pickle
+
 message = {
     "event": "auth_user_add"
     "data": {
@@ -28,6 +32,12 @@ message = {
         "username": "anjalbam"
     }
 }
+
+bin_message = pickle.dumps(message)
+# bin_message is sent to the queue
+
+# On Consumer side
+message = pickle.loads(bin_message)
 ```
 
 > **Note:** This convention of messaging needs to be followed along all the services for data exchange among them.

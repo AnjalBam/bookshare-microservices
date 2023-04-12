@@ -2,6 +2,10 @@ from .consumers import get_mq_connection
 import pickle
 
 
+def encode_message(message):
+    return pickle.dumps(message)
+
+
 def send_message_to_queue(queue="hello", exchange="", body="Hello World!"):
     connection = get_mq_connection()
     channel = connection.channel()
@@ -19,7 +23,7 @@ def broadcast_message(exchange_name=None, message=""):
     connection = get_mq_connection()
     channel = connection.channel()
 
-    bin_message = pickle.dumps(message) # convert to binary format for sending over to the queue
+    bin_message = encode_message(message) # convert to binary format for sending over to the queue
 
     channel.exchange_declare(exchange=exchange_name, exchange_type="fanout")
 

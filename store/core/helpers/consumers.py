@@ -1,4 +1,4 @@
-import telnetlib, pika, time
+import telnetlib, pika, time, pickle
 from decouple import config
 
 MQ_HOST = config("RABBIT_MQ_HOST", default="localhost")
@@ -7,6 +7,9 @@ import threading
 stop_event = threading.Event()
 
 AUTH_EVENTS = 'auth_events'
+
+def decode_message(message):
+    return pickle.loads(message)
 
 def get_mq_connection():
     try:
@@ -36,7 +39,7 @@ def listen_to_queue():
     channel.queue_declare(queue="hello")
 
     def callback(ch, method, properties, body):
-        print("QUEUE:: [x] Received %r" % body)
+        print("QUEUE:: [x] Received %r" % decode_message(body))
 
     channel.basic_consume(queue="hello", on_message_callback=callback, auto_ack=True)
 
@@ -60,7 +63,7 @@ def listen_to_auth_events():
     channel.queue_bind(exchange=AUTH_EVENTS, queue=AUTH_QUEUE_NAME)
 
     def callback(ch, method, properties, body):
-        print("AUTH:: [x] Received %r" % body)
+        print("AUTH:: [x] Received %r" % decode_message(body))
 
     channel.basic_consume(queue=AUTH_QUEUE_NAME, on_message_callback=callback, auto_ack=True)
 
@@ -80,7 +83,7 @@ def listen_to_queue_2():
     channel.queue_declare(queue="test")
 
     def callback(ch, method, properties, body):
-        print("QUEUE2:: [x] Received %r" % body)
+        print("QUEUE2:: [x] Received %r" % decode_message(body))
 
     channel.exchange_declare(exchange=AUTH_EVENTS, exchange_type="fanout")
     channel.exchange_declare(exchange='test_exchange', exchange_type="fanout")
