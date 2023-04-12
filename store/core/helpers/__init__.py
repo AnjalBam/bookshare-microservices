@@ -1,1 +1,0 @@
-from .consumers import start_consumers

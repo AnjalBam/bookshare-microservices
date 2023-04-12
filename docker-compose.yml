@@ -61,7 +61,7 @@ services:
             - POSTGRES_PASSWORD=${AUTH_POSTGRES_PASSWORD}
             - POSTGRES_DB=${AUTH_POSTGRES_DB}
         volumes:
-            - bookshare_postgres_auth_00:/var/lib/postgresql/data/
+            - bookshare_postgres_auth_01:/var/lib/postgresql/data/
 
         expose:
             - ${AUTH_POSTGRES_PORT}
@@ -77,7 +77,7 @@ services:
             - POSTGRES_PASSWORD=${STORE_POSTGRES_PASSWORD}
             - POSTGRES_DB=${STORE_POSTGRES_DB}
         volumes:
-            - bookshare_postgres_store_00:/var/lib/postgresql/data/
+            - bookshare_postgres_store_01:/var/lib/postgresql/data/
 
         expose:
             - ${STORE_POSTGRES_PORT}
@@ -235,8 +235,8 @@ services:
 volumes:
     rabbit_mq_data_00:
     rabbit_mq_logs_00:
-    bookshare_postgres_store_00:
-    bookshare_postgres_auth_00:
+    bookshare_postgres_store_01:
+    bookshare_postgres_auth_01:
     bookshare_redis_00:
 
 networks:

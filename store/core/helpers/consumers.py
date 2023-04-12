@@ -1,6 +1,8 @@
 import telnetlib, pika, time, pickle
 from decouple import config
 
+from core.helpers.event_handlers import event_handler_map
+
 MQ_HOST = config("RABBIT_MQ_HOST", default="localhost")
 
 import threading
@@ -63,7 +65,22 @@ def listen_to_auth_events():
     channel.queue_bind(exchange=AUTH_EVENTS, queue=AUTH_QUEUE_NAME)
 
     def callback(ch, method, properties, body):
-        print("AUTH:: [x] Received %r" % decode_message(body))
+        message = decode_message(body)
+        event = message.get('event', None)
+        print('Auth event listened...')
+        if not event:
+            print('AUTH:: No event passed in the message')
+            return
+
+        if event in event_handler_map:
+            event_handler = event_handler_map.get(event, None)
+            event_handler(message.get('data', {}))
+            print("AUTH:: Event handler", event_handler)
+
+        else:
+            print('AUTH:: No event handler found for the event: `', event, '`')
+
+        print("AUTH:: [x] Received %r" % message)
 
     channel.basic_consume(queue=AUTH_QUEUE_NAME, on_message_callback=callback, auto_ack=True)
 

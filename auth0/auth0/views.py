@@ -104,9 +104,9 @@ class UserSignUpView(APIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         user_data = {'first_name': user.first_name, 'last_name': user.last_name, 'is_staff': user.is_staff, 'is_active': user.is_active,
-                     'idx': user.idx, 'email': user.email, 'is_verified': user.is_verified}
-        
-        
+                     'idx': user.idx, 'email': user.email, 'is_verified': user.is_verified, 'username': user.username}
+        message = get_formatted_broadcast_message(event_type="auth_user_create", data=user_data)
+        broadcast_message(exchange_name="auth_events", message=message)
 
         return Response(
             {"detail": "Sign up view", "data": serializer.data},
