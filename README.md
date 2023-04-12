@@ -15,8 +15,13 @@ It is a Microservices application. One of my side projects to practice and imple
 
 - [x] Establish a communication standard, or specifically message exchange format, to facilitate a seamless communication between the services. This will help make communication uniform across various services in future too.
 
-- [ ] Create a communication between the auth and store such that, if a user is created in authentication service, it should create an entry in `Owner` model in the store service, which will treat and manage its own data there. This model is supposed to be in sync with the User table where both of them share the same `idx`.
+- [x] Create a communication between the auth and store such that, if a user is created in authentication service, it should create an entry in `Owner` model in the store service, which will treat and manage its own data there. This model is supposed to be in sync with the User table where both of them share the same `idx`.
 
+- [x] The API Gateway will also handle the inter service communication to make sure the services receive the requests only from the gateway and otherwise will get rejected.
+
+- [ ] If any user creation update or deletion, any events shall trigger an event with a broadcast message to all the listening services and will make changes likewise.
+
+- [ ] The API and management for authentication for services.
 
 
 ## MESSAGE FORMAT
