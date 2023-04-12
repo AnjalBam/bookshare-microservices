@@ -1,6 +1,14 @@
 # Bookshare Microservices
 It is a Microservices application. One of my side projects to practice and implement different concepts learnt about microservices architecture.
 
+## Service List
+- [x] Auth - handle user authorization and authentication
+- [x] Store - handle book ordering, lending, borrowing, along with borrowing history, etc.
+- [ ] BookMetadata - Handle Storage of book meta data such as isbn, name, author, cover images, etc.
+- [ ] Notification Service - handle notifications on Requests, Orders, etc.
+- [ ] Posts should handle user posting books, reviews, and public requests.
+
+
 ## Feature Progress
 
 - [x] Create two services: Auth and Store
