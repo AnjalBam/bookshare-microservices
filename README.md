@@ -3,19 +3,19 @@ It is a Microservices application. One of my side projects to practice and imple
 
 ## Feature Progress
 
-[x] Create two services: Auth and Store
+- [x] Create two services: Auth and Store
 
-[x] the `auth` service will handle all the authentication and authorization
+- [x] the `auth` service will handle all the authentication and authorization
 
-[x] There will be individual database services for each service
+- [x] There will be individual database services for each service
 
-[x] Create an API gateway (in our case it is called `mool_dwar`) which identify services based on endpoints, and reroute the requests to the respective services
+- [x] Create an API gateway (in our case it is called `mool_dwar`) which identify services based on endpoints, and reroute the requests to the respective services
 
-[x] Create a message queue, we've used `RabbitMQ`, for asynchronous communication between the services
+- [x] Create a message queue, we've used `RabbitMQ`, for asynchronous communication between the services
 
-[x] Establish a communication standard, or specifically message exchange format, to facilitate a seamless communication between the services. This will help make communication uniform across various services in future too.
+- [x] Establish a communication standard, or specifically message exchange format, to facilitate a seamless communication between the services. This will help make communication uniform across various services in future too.
 
-[] Create a communication between the auth and store such that, if a user is created in authentication service, it should create an entry in `Owner` model in the store service, which will treat and manage its own data there. This model is supposed to be in sync with the User table where both of them share the same `idx`.
+- [ ] Create a communication between the auth and store such that, if a user is created in authentication service, it should create an entry in `Owner` model in the store service, which will treat and manage its own data there. This model is supposed to be in sync with the User table where both of them share the same `idx`.
 
 
 
