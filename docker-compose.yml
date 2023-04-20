@@ -9,6 +9,7 @@ x-store-env: &store_env
     REDIS_HOST: redis
     REDIS_PORT: ${REDIS_PORT}
     RABBIT_MQ_HOST: bookshare_mq
+    JWT_SIGNING_KEY: ${JWT_SIGNING_KEY}
 
 x-auth-env: &auth_env
     POSTGRES_USER:  ${AUTH_POSTGRES_USER}
@@ -19,6 +20,7 @@ x-auth-env: &auth_env
     REDIS_HOST:  redis
     REDIS_PORT:  ${REDIS_PORT}
     RABBIT_MQ_HOST:  bookshare_mq
+    JWT_SIGNING_KEY: ${JWT_SIGNING_KEY}
 
 services:
     mool_dwar:
@@ -179,6 +181,9 @@ services:
 
         networks:
             - bookshare-net
+
+        stdin_open: true
+        tty: true
 
     store-consumer-auth:
         image: bookshare/store

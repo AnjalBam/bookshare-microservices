@@ -92,6 +92,7 @@ REST_FRAMEWORK = {
 SIMPLE_JWT =  {
     "USER_ID_FIELD": "idx",
     "USER_ID_CLAIM": "user_idx",
+    "SIGNING_KEY": config("JWT_SIGNING_KEY", "super_secret_key"),
 }
 
 # Database

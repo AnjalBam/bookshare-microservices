@@ -54,6 +54,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "core.middlewares.BSAuthMiddleware.BSAuthMiddleware",
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
@@ -138,3 +139,5 @@ import redis
 
 pool = redis.ConnectionPool(host=config("REDIS_HOST"), port=config("REDIS_PORT", default=6379, cast=int), db=0)
 REDIS_CLIENT = redis.Redis(connection_pool=pool)
+
+JWT_SIGNING_KEY = config("JWT_SIGNING_KEY", default="secret_key")

@@ -11,4 +11,3 @@ response_codes = {
     'server_error': 5000,
 }
 
-from rest_framework import status
