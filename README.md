@@ -29,7 +29,7 @@ It is a Microservices application. One of my side projects to practice and imple
 
 - [ ] If any user creation update or deletion, any events shall trigger an event with a broadcast message to all the listening services and will make changes likewise.
 
-- [ ] The API and management for authentication for services.
+- [x] The API and management of authentication for services. The services shall use the JWT to get information and attach user details and authentication status to the request object.
 
 
 ## MESSAGE FORMAT
